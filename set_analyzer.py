@@ -5,6 +5,7 @@
 
 import numpy as np
 import pandas as pd
+import re
 
 def loadLimitedSet(allSets, set_code):
     """
@@ -282,6 +283,8 @@ def analyzeSetFixing(cards):
         - True if the card produces mana, based on the specified patterns.
         - False otherwise.
         """
+        if not isinstance(s, str):
+            s = ""
         
         pattern1 = r'add (?:\d+|one|two|three|four|five) mana'
         match1 = re.search(pattern1, s, re.IGNORECASE)
@@ -342,7 +345,7 @@ def analyzeSetFixing(cards):
                 df['keywords'].apply(lambda x: 'Treasure' in str(x))
                 ])
     
-        # @dev, here does not account for any other type of mana production (ie. Dark Ritual)
+        # here does not account for any other type of mana production (ie. Dark Ritual)
     
         producer_type = {
             'Lands': a,
