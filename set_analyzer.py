@@ -51,9 +51,10 @@ def loadLimitedSet(allSets, set_code):
 
     # Load cards
     df = pd.DataFrame.from_dict(allSets.loc[set_code]['cards'])
-    #cards = df.loc[:allSets.loc[set_code]['baseSetSize']-1-5, features_analyzed] # remove the last 5 cards that are always basic lands
     n_firstPlains = df.loc[df['name']=='Plains'].first_valid_index()
-    cards = df.loc[:n_firstPlains-1, features_analyzed]
+    if n_firstPlains == None: # case when there is no basic land in set (commander sets, MAT, ...)
+        cards = df.loc[:allSets.loc[set_code]['baseSetSize']-1, features_analyzed]
+    else: cards = df.loc[:n_firstPlains-1, features_analyzed]
 
     # Clean duplicates
     cards = cards.drop_duplicates(subset=['name','text'], keep='first')
@@ -171,18 +172,18 @@ def analyzeSetBoardState(cards):
     #cardsCreatureFiltered['normalizedPowerToToughness'] = cardsCreatureFiltered['power'] - meanPowerToToughness  
     
     # Evasion
-    def countKeywords(_cards):
-        unique_keywords = list(_cards['keywords'].explode().unique())
+    def countKeywords(cards):
+        unique_keywords = list(cards['keywords'].explode().unique())
         unique_keywords.remove(np.nan)
-        exploded_data = _cards.explode('keywords')
+        exploded_data = cards.explode('keywords')
         filtered_data = exploded_data[exploded_data['keywords'].isin(unique_keywords)]
-        KW_count = exploded_data['keywords'].value_counts().to_dict()
+        KW_count = filtered_data['keywords'].value_counts().to_dict()
         return KW_count
     
     KWCount = countKeywords(cardsCreatureFiltered)
     
     def countEvasiveKeywords(keyword_dict, keyword_list):
-        evasiveCount = [keyword_dict[key] for key in keyword_list]
+        evasiveCount = [keyword_dict.get(key, 0) for key in keyword_list]
         return evasiveCount
     
     evasiveKW = ['Flying', 'Trample', 'Menace'] # @dev, could be set as an argument of the function
