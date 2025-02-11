@@ -29,6 +29,7 @@ def loadSet(allSets, set_code, restriction='all'):
         cards = df
 
     def getBaseSet(d):
+        # Remove card numbers after the first basic Land (a Plains)
         n_firstPlains = d.loc[d['name']=='Plains'].first_valid_index()
         if n_firstPlains == None: # case when there is no basic land in set (commander sets, MAT, ...)
             cards = d.loc[:allSets.loc[set_code]['baseSetSize']-1, features_analyzed]
@@ -38,7 +39,7 @@ def loadSet(allSets, set_code, restriction='all'):
         c = c.drop_duplicates(subset=['name','text'], keep='first')
     
         # Clean numeric data
-        c[['manaValue', 'power', 'toughness']] = c[['manaValue', 'power', 'toughness']].apply(pd.to_numeric, errors='coerce')
+        c[['manaValue', 'power', 'toughness']] = c[['manaValue', 'power', 'toughness']].apply(pd.to_numeric, errors='coerce').fillna(0)
 
         return c
         
@@ -51,19 +52,4 @@ def loadSet(allSets, set_code, restriction='all'):
         # Keep only common and uncommon cards
         cards = cards[cards['rarity'].isin(['common', 'uncommon'])]
 
-    
-        #n_firstPlains = df.loc[df['name']=='Plains'].first_valid_index()
-        #if n_firstPlains == None: # case when there is no basic land in set (commander sets, MAT, ...)
-        #    cards = df.loc[:allSets.loc[set_code]['baseSetSize']-1, features_analyzed]
-        #else: cards = df.loc[:n_firstPlains-1, features_analyzed]
-
-    # Clean duplicates
-    #cards = cards.drop_duplicates(subset=['name','text'], keep='first')
-    
-    # Clean numeric data
-    #cards[['manaValue', 'power', 'toughness']] = cards[['manaValue', 'power', 'toughness']].apply(pd.to_numeric, errors='coerce')
-    
-    # Keep only common and uncommon cards
-    #cards = cards[cards['rarity'].isin(['common', 'uncommon'])]
-    
     return cards
