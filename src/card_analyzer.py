@@ -7,79 +7,117 @@
 import numpy as np
 import pandas as pd
 import re
+from typing import List
 
-#check if a card is or can be a body that impact the board state
-# def isBody(cards):
-# what is a body ? (pure body)
-# - Creatures
-# - cards that creates creatures token immediatly
-# - cards that put creatures on the battlefield **without any conditions**
-# 
-# definition of a quasi-body : card that creates / becomes a body under certain conditions ('becomes a creature, ie. Crew'), should have identified power / toughness (for example, does not count recursion on targeted creatures)
+class Effects():
+    def __init__(self, card_text: str):
+        self.card_text = card_text
+
+    def creates_token(self) -> bool:
+        pattern = r'creat(e|es) .*? creature token'
+        return bool(re.search(pattern, self.card_text, re.IGNORECASE | re.DOTALL))
+    
+    def is_ETB(self) -> bool:
+        pattern = r'when .*? ente(r|rs)'
+        return bool(re.search(pattern, self.card_text, re.IGNORECASE | re.DOTALL))
+
+class BodyFeatures():
+    def __init__(self, card: pd.Series):
+        self.card = card
+        self.body_features = pd.Series({
+            'power': None,      #int
+            'toughness': None,  #int
+            'evasion': None,    #List[str]
+            'type': None,       #List[str]
+            'condition': None   #List[str]
+        })
+    
+class InteractionFeatures():
+    ...
+
+class ManaProductionFeatures():
+    ...
+
+class Descriptor():
+    def __init__(self, card:pd.Series):
+        self.card = card
+        self.effects = Effects(self.card['text'])
+
+    def is_type(self, typelist: List[str]) -> bool:
+        return any(t in self.card['types'] for t in typelist)
+
+    def is_permanent(self) -> bool:
+        return self.is_type(['Land', 'Creature', 'Artifact', 'Enchantment', 'Planeswalker', 'Battle'])
+
+    def is_body(self) -> bool:
+        return (
+            # Filter 1 : is a creature
+            (
+                self.is_type(['Creature'])
+            ) |
+            # Filter 2 : creates creature tokens as ETB (for permanents)
+            (
+                self.is_permanent()
+                & self.effects.is_ETB()
+                & self.effects.creates_token()
+            ) |
+            # Filter 3 : creates creature token as instant or sorcery (for non-pemanents)
+            (
+                self.is_type(['Instant', 'Sorcery'])
+                & self.effects.creates_token()
+            )
+        )
+    
+    def activate_features(self) -> pd.Series:
+        features = pd.Series()
+        if self.is_body():
+            body = Body()
+            features['body'] = body.get_body_features()
+        return features
+
+class Card():
+    def __init__(self, card: pd.Series) -> None:
+        # Define cards features to be analyzed
+        FEATURES_ANALYZED = [
+            'name',
+            'keywords',
+            'manaValue',
+            'manaCost',
+            'colorIdentity',
+            'power',
+            'toughness',
+            'rarity',
+            'types',
+            'text']
+        self.card = card[FEATURES_ANALYZED]
+        self.descriptor = Descriptor(card)
+
+    def __repr__(self) -> str:
+        return f"Card({self.card})"
+    
+    def show(self) -> pd.Series:
+        return self.card
+    
+    def show_details(self) -> pd.Series:
+        details = self.card.copy()
+        for feature_series in self.features.values():
+            details = pd.concat([details, feature_series])
+        return details
+
+"""
+def isQuasiBody(cards: pd.DataFrame) -> None:
+    # definition of a quasi-body : card that creates / becomes a body under certain conditions ('becomes a creature, ie. Crew'), should have identified power / toughness (for example, does not count recursion on targeted creatures)
 # - when you pay a cost
 # - creates tokens under conditions
-
-
-# Filtering functions @dev, s should be a Pandas Series
-
-def isType(card, typelist):
-    return any(t in card['types'] for t in typelist)
-
-def isPermanent(card):
-    return isType(card['types'], ['Land', 'Creature', 'Artifact', 'Enchantment', 'Planeswalker', 'Battle'])
-
-def createsToken(card):
-    pattern = r'creat(e|es) .*? creature token'
-    return bool(re.search(pattern, card['text'], re.IGNORECASE | re.DOTALL))
-
-def isETB(card):
-    pattern = r'when .*? ente(r|rs)'
-    return bool(re.search(pattern, card['text'], re.IGNORECASE | re.DOTALL))
-
-def isBody(card):
-    return (
-        # Filter 1 : is a creature
-        (
-            isType(card['types'], ['Creature'])
-        ) |
-        # Filter 2 : creates creature tokens as ETB (for permanents)
-        (
-            isPermanent(card['types'])
-            & isETB(card['text'])
-            & createsToken(card['text'])
-        ) |
-        # Filter 3 : creates creature token as instant or sorcery (for non-pemanents)
-        (
-            isType(card['types'], ['Instant', 'Sorcery'])
-            & createsToken(card['text'])
-        )
-    )
-# also def isCABS
-
-def isQuasiBody(cards):
-    # Filter 1 : becomes a body when you pay a cost ('becomes %% creature')
-    # return the cost of becoming a body
-    
-    # Filter 2 : creates token under certain conditions (LTB (when/whenever dies), attacks, === 'whenever')
-    
-    # Filter 3 : put another body card on the battlefield (example : Manifest, Cascade, Discover, recursion, etc)
-    # putOnBF
     pass
 
-
-
-# def isLTB
-# def putOnBF
-
-
-
-def getBodyStats(card):
-
+def getBodyStats(card: pd.Series) -> Union[Tuple[str, int, int, int], None]:
     # pass the function it is not a body
     if not (isBody(card) | isQuasiBody(card)):
-        return print("Not a body")
+        print("Not a body")
+        return None
         
-    def findTokenPowerToughness(text):
+    def findTokenPowerToughness(text: str) -> Tuple[int, int]:
         pattern = r'creat(e|es).*?(\b(?:\d+|X)/(?:\d+|X)\b).*?creature token'
         match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
         
@@ -152,8 +190,7 @@ def getBodyStats(card):
         bdPower = p
         bdToughness = t
 
-    return bdType, bdManaValue, bdPower, bdToughness
-    
+    return bdType, bdManaValue, bdPower, bdToughness    
 
 # def isEvasive() #check if a card is evasive and returns a list of keywords
 
@@ -165,3 +202,11 @@ def getBodyStats(card):
 # isMultiPip()
 # isManaProducer() ex- producesMana()
 
+
+"""    
+
+def main() -> None: # TBD
+    ...
+
+if __name__ == "__main__":
+    main()
