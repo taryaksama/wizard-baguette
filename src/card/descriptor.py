@@ -17,6 +17,7 @@ from typing import List
 # Load all dependent features
 from .effects import *
 from .body import *
+from .manaprod import *
 
 class Descriptor():
     def __init__(self, card:pd.Series):
