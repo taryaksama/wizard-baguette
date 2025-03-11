@@ -14,39 +14,37 @@ def word_check_decorator(words: List[str]):
     def decorator(func):
         def wrapper(self):
             for word in words:
-                if word in self.card_text.lower():
+                if word in self.card_text:
                     return True
             return False
         return wrapper
     return decorator
 
-def pattern_check_decorator(pattern: str):
+def pattern_check_decorator(patterns: List[str]):
     def decorator(func):
         def wrapper(self):
-            return bool(re.search(pattern, self.card_text, re.IGNORECASE | re.DOTALL))
+            for pattern in patterns:
+                return bool(re.search(pattern, self.card_text, re.IGNORECASE | re.DOTALL))
         return wrapper
     return decorator
 
 class Effects():
     def __init__(self, card_text: str):
-        self.card_text = card_text
-
-    @pattern_check_decorator(r'creat(e|es) .*? creature token')
-    def creates_token(self) -> bool:
-        pass
-
-    @pattern_check_decorator(r'when .*? ente(r|rs)')
-    def is_ETB(self) -> bool:
-        pass
+        self.card_text = card_text.lower()
     
     @classmethod
-    def generate_word_check_methods(cls, method_dict: Dict[str, List[str]]):
-        for method_name, words in word_check_method_dict.items():
-            method = word_check_decorator(words)(lambda self: None)
-            # Set the method name and add it to the class
+    def generate_pattern_check_methods(cls, method_dict: Dict[str, List[str]]):
+        for method_name, patterns in method_dict.items():
+            method = pattern_check_decorator(patterns)(lambda self: None)
             setattr(cls, method_name, method)
 
-# Dictionary mapping method names to lists of words
+    @classmethod
+    def generate_word_check_methods(cls, method_dict: Dict[str, List[str]]):
+        for method_name, words in method_dict.items():
+            method = word_check_decorator(words)(lambda self: None)
+            setattr(cls, method_name, method)
+
+# Dictionary mapping method names to lists of words to checks
 word_check_method_dict = {
     "is_targeting": ["target", "choose", "select"],
     "is_damage": ["deals", "damage"],
@@ -57,9 +55,14 @@ word_check_method_dict = {
     "is_draw": ["draw"],
     "is_tutor": ["search"]
 }
-
 Effects.generate_word_check_methods(word_check_method_dict)
-#generate_word_check_methods(word_check_method_dict)
+
+# Dictionary mapping method names to lists of text patterns to checks
+pattern_check_method_dict = {
+    "is_ETB": [r"when .*? ente(r|rs)"],
+    "creates_token": [r"creat(e|es) .*? creature token"]
+}
+Effects.generate_pattern_check_methods(pattern_check_method_dict)
 
 def main():
     ...

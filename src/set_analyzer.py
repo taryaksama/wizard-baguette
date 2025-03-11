@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import re
 
-import card_analyzer
+from .card_analyzer import *
 
 def loadLimitedSet(allSets, set_code):
     """

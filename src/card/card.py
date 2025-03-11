@@ -30,6 +30,7 @@ class Card():
             'text']
         self.card = card[FEATURES_ANALYZED]
         self.descriptor = Descriptor(card)
+        self.effects = Effects(self.card['text'])
 
     def __repr__(self) -> str:
         return f"Card({self.card})"
@@ -37,11 +38,11 @@ class Card():
     def show(self) -> pd.Series:
         return self.card
     
-    def show_details(self) -> pd.Series:
-        details = self.card.copy()
-        for feature_series in self.features.values():
-            details = pd.concat([details, feature_series])
-        return details
+    #def show_details(self) -> pd.Series:
+    #    details = self.card.copy()
+    #    for feature_series in self.features.values():
+    #        details = pd.concat([details, feature_series])
+    #    return details
     
 def main() -> None:
     ...
