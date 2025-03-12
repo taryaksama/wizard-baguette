@@ -13,7 +13,6 @@ from typing import List, Dict
 from .__config__ import FEATURES_ANALYZED
 
 # Load all dependent features
-#from .descriptor import *
 from .effects import *
 from .body import *
 from .interaction import *
@@ -31,27 +30,27 @@ class CardMixin():
             # Filter 1 : is a creature
             (
                 self.is_type(['Creature'])
-            ) |
+            ) or
             # Filter 2 : creates creature tokens as ETB (for permanents)
             (
                 self.is_permanent()
-                & self.effects.is_ETB()
-                & self.effects.creates_token()
-            ) |
+                and self.effects.is_ETB()
+                and self.effects.creates_token()
+            ) or
             # Filter 3 : creates creature token as instant or sorcery (for non-pemanents)
             (
                 self.is_type(['Instant', 'Sorcery'])
-                & self.effects.creates_token()
+                and self.effects.creates_token()
             )
         )
     
     def is_interaction(self) -> bool:
         return (
             self.effects.is_targeting() 
-            & (
-                self.effects.is_removal() | 
-                self.effects.is_damage() | 
-                self.effects.is_sacrifice() | 
+            and (
+                self.effects.is_removal() or 
+                self.effects.is_damage() or 
+                self.effects.is_sacrifice() or 
                 self.effects.is_counter() 
             )
         )
@@ -62,20 +61,7 @@ class CardMixin():
 class Card(CardMixin):
     # Initialization
     def __init__(self, card: pd.Series) -> None:
-        # Define cards features to be analyzed
-        # FEATURES_ANALYZED = [
-        #     'name',
-        #     'keywords',
-        #     'manaValue',
-        #     'manaCost',
-        #     'colorIdentity',
-        #     'power',
-        #     'toughness',
-        #     'rarity',
-        #     'types',
-        #     'text']
         self.card = card[FEATURES_ANALYZED]
-        #self.descriptor = Descriptor(card)
         self.effects = Effects(self.card['text'])
 
         # Composed features

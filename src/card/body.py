@@ -24,6 +24,6 @@ class BodyFeatures(CardMixin):
             'power': None,      #int
             'toughness': None,  #int
             'evasion': None,    #List[str]
-            'type': None,       #List[str]
+            'body_type': None,  #List[str]
             'condition': None   #List[str]
         })
