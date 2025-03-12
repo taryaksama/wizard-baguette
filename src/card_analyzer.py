@@ -106,7 +106,7 @@ def getBodyStats(card: pd.Series) -> Union[Tuple[str, int, int, int], None]:
 
 # def isInteraction #check if a card can interact with another + classify the type of interaction (hard removal, reversible/soft removal, stun, counter)
 
-# ---FROM card_analyzer.py---
+# ---FROM set_analyzer.py---
 # isMultiPip()
 # isManaProducer() ex- producesMana()
 

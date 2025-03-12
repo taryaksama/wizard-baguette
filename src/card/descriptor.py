@@ -60,6 +60,9 @@ class Descriptor():
             )
         )
     
+    def is_mana_producer(self) -> bool:
+        return self.effects.produces_mana()
+
     def activate_features(self) -> pd.Series:
         features = pd.Series()
         if self.is_body():

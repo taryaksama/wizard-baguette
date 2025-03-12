@@ -14,9 +14,10 @@ Defines the main properties of what constitutes a body in a Magic: the Gathring 
 import pandas as pd
 
 # Load all dependent features
+from .card import *
 from .effects import *
 
-class BodyFeatures():
+class BodyFeatures(CardMixin):
     def __init__(self, card: pd.Series):
         self.card = card
         self.body_features = pd.Series({

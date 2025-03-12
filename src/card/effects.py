@@ -24,7 +24,9 @@ def pattern_check_decorator(patterns: List[str]):
     def decorator(func):
         def wrapper(self):
             for pattern in patterns:
-                return bool(re.search(pattern, self.card_text, re.IGNORECASE | re.DOTALL))
+                if bool(re.search(pattern, self.card_text, re.IGNORECASE | re.DOTALL)):
+                    return True
+            return False
         return wrapper
     return decorator
 
@@ -60,7 +62,8 @@ Effects.generate_word_check_methods(word_check_method_dict)
 # Dictionary mapping method names to lists of text patterns to checks
 pattern_check_method_dict = {
     "is_ETB": [r"when .*? ente(r|rs)"],
-    "creates_token": [r"creat(e|es) .*? creature token"]
+    "creates_token": [r"creat(e|es) .*? creature token"],
+    "produces_mana": [r"add (?:\d+|one|two|three|four|five) mana", r"add {"]
 }
 Effects.generate_pattern_check_methods(pattern_check_method_dict)
 
