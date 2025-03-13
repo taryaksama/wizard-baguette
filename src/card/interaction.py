@@ -8,8 +8,8 @@ Describes the interaction effects of a of Magic: the Gathring printed card
 
 import pandas as pd
 
-from .card import *
+from .mixin import *
 
 class InteractionFeatures(CardMixin):
     def __init__(self, card: pd.Series):
-        self.card = card
+        super().__init__(card)

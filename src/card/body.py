@@ -14,12 +14,12 @@ Defines the main properties of what constitutes a body in a Magic: the Gathring 
 import pandas as pd
 
 # Load all dependent features
-from .card import *
-from .effects import *
+from .mixin import *
 
 class BodyFeatures(CardMixin):
     def __init__(self, card: pd.Series):
-        self.card = card
+        # self.card = card
+        super().__init__(card)
         self.body_features = pd.Series({
             'power': None,      #int
             'toughness': None,  #int

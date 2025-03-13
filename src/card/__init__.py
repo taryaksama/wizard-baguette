@@ -1,8 +1,8 @@
 # src/card/__init__.py
 # author: @taryaksama
 
+from .mixin import *
 from .card import *
-#from .descriptor import *
 from .effects import *
 from .body import *
 from .interaction import *
