@@ -12,18 +12,11 @@ import pandas as pd
 import re
 from typing import List, Dict
 
+# Load configuration file
+from .__config__ import MANA_COLORS
+
 # Load all dependent features
 from .mixin import *
-
-MANA_COLORS = {
-    "W": 0,
-    "U": 0,
-    "B": 0,
-    "R": 0,
-    "G": 0,
-    "C": 0,
-    "ALL": 0,
-}
 
 class ManaProducerFeatures(CardMixin):
     def __init__(self, card:pd.Series):

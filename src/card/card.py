@@ -34,11 +34,6 @@ class Card(CardMixin):
     
     def show(self) -> pd.Series:
         return self.card
-    
-    #    details = self.card.copy()
-    #    for feature_series in self.features.values():
-    #        details = pd.concat([details, feature_series])
-    #    return details
    
 def main() -> None:
     ...

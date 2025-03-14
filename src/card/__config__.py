@@ -16,3 +16,13 @@ FEATURES_ANALYZED = [
     'rarity',
     'types',
     'text']
+
+MANA_COLORS = {
+    "W": 0,
+    "U": 0,
+    "B": 0,
+    "R": 0,
+    "G": 0,
+    "C": 0,
+    "ALL": 0,
+}

@@ -10,7 +10,7 @@ import pandas as pd
 from typing import List, Dict
 
 # Load configuration file
-from .__config__ import FEATURES_ANALYZED
+from .__config__ import FEATURES_ANALYZED, MANA_COLORS
 
 # Load all dependent features
 from .effects import *
@@ -25,6 +25,12 @@ class CardMixin():
 
     def is_permanent(self) -> bool:
         return self.is_type(['Land', 'Creature', 'Artifact', 'Enchantment', 'Planeswalker', 'Battle'])
+
+    def is_multicolor(self) -> tuple[bool, dict]:
+        ...
+
+    def is_multipip(self) -> tuple[bool, int]: 
+        ...
 
     def is_body(self) -> bool:
         return (
